@@ -1,0 +1,57 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Cliente {
+  id           Int      @id @default(autoincrement())
+  nome         String
+  email        String   @unique
+  telefone     String?
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+  pedidos      Pedido[]
+}
+
+model Produto {
+  id                Int          @id @default(autoincrement())
+  nome              String
+  descricao         String?
+  preco             Decimal      @db.Decimal(10, 2)
+  quantidadeEstoque Int          @default(0)
+  criadoEm          DateTime     @default(now())
+  atualizadoEm      DateTime     @updatedAt
+  itens             ItemPedido[]
+}
+
+model Pedido {
+  id          Int          @id @default(autoincrement())
+  clienteId   Int
+  cliente     Cliente      @relation(fields: [clienteId], references: [id])
+  dataCriacao DateTime     @default(now())
+  total       Decimal      @default(0) @db.Decimal(12, 2)
+  itens       ItemPedido[]
+}
+
+model ItemPedido {
+  id         Int     @id @default(autoincrement())
+  pedidoId   Int
+  produtoId  Int
+  quantidade Int     @default(1)
+  subtotal   Decimal @default(0) @db.Decimal(12, 2)
+  pedido     Pedido  @relation(fields: [pedidoId], references: [id])
+  produto    Produto @relation(fields: [produtoId], references: [id])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
