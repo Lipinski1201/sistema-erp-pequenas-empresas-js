@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post} from '@nestjs/common';
 import { ClientesService } from './clientes.service';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
@@ -7,7 +7,8 @@ import { UpdateClienteDto } from './dto/update-cliente.dto';
 export class ClientesController {
   constructor(private readonly service: ClientesService) {}
 
-  @Post() create(@Body() dto: CreateClienteDto) {
+  @Post()
+  create(@Body() dto: CreateClienteDto) {
     return this.service.create(dto);
   }
 
@@ -17,17 +18,17 @@ export class ClientesController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id') id: string) {
     return this.service.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateClienteDto) {
+  update(@Param('id') id: string, @Body() dto: UpdateClienteDto) {
     return this.service.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id') id: string) {
     return this.service.remove(id);
   }
 }

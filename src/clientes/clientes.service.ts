@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
@@ -6,23 +6,28 @@ import { UpdateClienteDto } from './dto/update-cliente.dto';
 @Injectable()
 export class ClientesService {
   constructor(private prisma: PrismaService) {}
+
   create(data: CreateClienteDto) {
-    return this.prisma.cliente.create({ data });
+    return this.prisma.client.create({ data });
   }
 
   findAll() {
-    return this.prisma.cliente.findMany({ orderBy: { criadoEm: 'desc' } });
+    return this.prisma.client.findMany({ orderBy: { createdAt: 'desc' } });
   }
 
-  findOne(id: number) {
-    return this.prisma.cliente.findUnique({ where: { id } });
+  async findOne(id: string) {
+    const client = await this.prisma.client.findUnique({ where: { id } });
+    if (!client) throw new NotFoundException('Client not found');
+    return client;
   }
 
-  update(id: number, data: UpdateClienteDto) {
-    return this.prisma.cliente.update({ where: { id }, data });
+  async update(id: string, data: UpdateClienteDto) {
+    await this.findOne(id);
+    return this.prisma.client.update({ where: { id }, data });
   }
 
-  remove(id: number) {
-    return this.prisma.cliente.delete({ where: { id } });
+  async remove(id: string) {
+    await this.findOne(id);
+    return this.prisma.client.delete({ where: { id } });
   }
 }
