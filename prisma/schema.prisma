@@ -1,11 +1,11 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 model Cliente {
@@ -32,10 +32,10 @@ model Produto {
 model Pedido {
   id          Int          @id @default(autoincrement())
   clienteId   Int
-  cliente     Cliente      @relation(fields: [clienteId], references: [id])
   dataCriacao DateTime     @default(now())
   total       Decimal      @default(0) @db.Decimal(12, 2)
   itens       ItemPedido[]
+  cliente     Cliente      @relation(fields: [clienteId], references: [id])
 }
 
 model ItemPedido {
@@ -52,64 +52,68 @@ model User {
   id        String   @id @default(cuid())
   name      String
   email     String   @unique
-  password  String?
+  password  String
+  role      String   @default("user")
+  active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("users")
 }
 
 model Client {
-  id          String    @id @default(cuid())
-  name        String
-  document    String    @unique // CPF ou CNPJ (só como string por enquanto)
-  email       String?   @db.VarChar(255)
-  phone       String?   @db.VarChar(30)
-  address     String?   @db.VarChar(255)
-  sales       Sale[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  document  String   @unique
+  email     String?  @db.VarChar(255)
+  phone     String?  @db.VarChar(30)
+  address   String?  @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sales     Sale[]
 }
 
 model Product {
-  id            String    @id   @default(cuid())
-  name          String 
-  description   String?
-  price         Float
-  stock         Int       @default(0)
-  category      String?
-  sku           String?   @unique 
-  active        Boolean   @default(true)
-  sale_items    SaleItem[]
-  createAt      DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  stock       Int        @default(0)
+  category    String?
+  sku         String?    @unique
+  active      Boolean    @default(true)
+  createAt    DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  sale_items  SaleItem[]
 
   @@map("products")
 }
 
 model Sale {
-  id             String @id @default(cuid())
-  clientId       String 
-  client         Client @relation(fields: [clientId], references: [id])
-  items          SaleItem[]
-  total          Float
-  status         String @default("peding") // peding, completed, cancelled
-  paymentMethod   String? // cash, credit_card, debit_card, pix 
-  notes          String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String     @id @default(cuid())
+  clientId      String
+  total         Float
+  status        String     @default("peding")
+  notes         String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  paymentMethod String?
+  items         SaleItem[]
+  client        Client     @relation(fields: [clientId], references: [id])
 
   @@map("sales")
 }
 
 model SaleItem {
-  id          String    @id   @default(cuid())
-  saleId      String 
-  sale        Sale      @relation(fields: [saleId], references: [id], onDelete: Cascade)
-  productId   String 
-  product     Product   @relation(fields: [productId], references: [id])
-  quantity    Int 
-  unitPrice   Float
-  subtotal    Float
-  createdAt   DateTime  @default(now())
+  id        String   @id @default(cuid())
+  saleId    String
+  productId String
+  quantity  Int
+  unitPrice Float
+  subtotal  Float
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+  sale      Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
 
   @@map("sale_items")
 }
